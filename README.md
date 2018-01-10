@@ -8,11 +8,11 @@ How to run the OrderMatchingEngine:
 
 Files:
 1. Inside src folder - Code files
-OrderInterface.java - Interface for Order class implementation
-Order.java - Order class represents blueprint for user requested orders
-OrderBookInterface.java - Interface for OrderBook class implementation
-OrderBook.java - OrderBook class represents blueprint for each instrument's orderbook
-MatchingEngine.java - MatchingEngine class tests order matching of buy/sell orders
+a. OrderInterface.java - Interface for Order class implementation
+b. Order.java - Order class represents blueprint for user requested orders
+c. OrderBookInterface.java - Interface for OrderBook class implementation
+d. OrderBook.java - OrderBook class represents blueprint for each instrument's orderbook
+e. MatchingEngine.java - MatchingEngine class tests order matching of buy/sell orders
 
 2. OrderMatchingEngine.jar - executable file
 3. csv files - Trading test data files

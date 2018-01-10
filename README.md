@@ -19,7 +19,7 @@ Files:
 4. sample_output.txt - Sample output file for one of the input test data
 
 
-Approach: (Main matching logic can be found in OrderBook.java)
+Approach: (Main matching logic can be found in function addOrder of OrderBook.java)
 1. Designed and implemented Order and OrderBook class
 
 2. Customized priority queues for buy and sell orders for each instrument's orderbook.

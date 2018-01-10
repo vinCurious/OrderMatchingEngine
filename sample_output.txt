@@ -1,0 +1,43 @@
+
+
+---------------- OrderBook for Googl ----------------
+id | time | instrument | price | side | trade_count
+------------------- Filled Orders ------------------
+16 | Sun Jan 08 07:20:31 EST 2017 | Googl | 100.0 | BUY | 90
+17 | Sun Jan 08 07:20:33 EST 2017 | Googl | 99.0 | SELL | 10
+12 | Sun Jan 08 07:20:29 EST 2017 | Googl | 101.0 | BUY | 50
+13 | Sun Jan 08 07:20:30 EST 2017 | Googl | 99.0 | BUY | 110
+14 | Sun Jan 08 07:20:31 EST 2017 | Googl | 99.0 | SELL | 150
+15 | Sun Jan 08 07:20:31 EST 2017 | Googl | 100.0 | SELL | 90
+--------------------- BUY Orders --------------------
+--------------------- SELL Orders -------------------
+15 | Sun Jan 08 07:20:31 EST 2017 | Googl | 100.0 | SELL | 10
+17 | Sun Jan 08 07:20:33 EST 2017 | Googl | 99.0 | SELL | 90
+
+
+---------------- OrderBook for AAPL ----------------
+id | time | instrument | price | side | trade_count
+------------------- Filled Orders ------------------
+0 | Sun Jan 08 05:20:19 EST 2017 | AAPL | 32.0 | BUY | 50
+1 | Sun Jan 08 05:20:20 EST 2017 | AAPL | 31.0 | SELL | 50
+3 | Sun Jan 08 05:20:31 EST 2017 | AAPL | 30.0 | BUY | 100
+5 | Sun Jan 08 05:20:32 EST 2017 | AAPL | 28.5 | SELL | 100
+--------------------- BUY Orders --------------------
+2 | Sun Jan 08 05:20:21 EST 2017 | AAPL | 30.0 | BUY | 150
+--------------------- SELL Orders -------------------
+4 | Sun Jan 08 05:20:30 EST 2017 | AAPL | 32.5 | SELL | 90
+1 | Sun Jan 08 05:20:20 EST 2017 | AAPL | 31.0 | SELL | 60
+
+
+---------------- OrderBook for IBM ----------------
+id | time | instrument | price | side | trade_count
+------------------- Filled Orders ------------------
+6 | Sun Jan 08 06:20:29 EST 2017 | IBM | 53.0 | BUY | 50
+7 | Sun Jan 08 06:20:30 EST 2017 | IBM | 49.0 | SELL | 110
+8 | Sun Jan 08 06:20:31 EST 2017 | IBM | 48.0 | SELL | 80
+9 | Sun Jan 08 06:20:31 EST 2017 | IBM | 50.0 | SELL | 100
+10 | Sun Jan 08 06:20:31 EST 2017 | IBM | 50.0 | BUY | 90
+11 | Sun Jan 08 06:20:33 EST 2017 | IBM | 52.0 | BUY | 150
+--------------------- BUY Orders --------------------
+--------------------- SELL Orders -------------------
+8 | Sun Jan 08 06:20:31 EST 2017 | IBM | 48.0 | SELL | 70

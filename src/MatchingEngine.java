@@ -67,7 +67,7 @@ public class MatchingEngine {
 
 				cursorOrderBook = orderBooks.get(rowElements[1]);
 
-				cursorOrderBook.addOrder(new Order((Date) format.parse(rowElements[0]), rowElements[1],
+				cursorOrderBook.addOrderHelper(new Order((Date) format.parse(rowElements[0]), rowElements[1],
 						Double.parseDouble(rowElements[2]), rowElements[3], Integer.parseInt(rowElements[4])));
 			}
 			buffer.close();

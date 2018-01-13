@@ -82,6 +82,64 @@ public class OrderBook {
 		});
 	}
 
+	void addOrderHelper(Order placed_order) {
+		if (placed_order.order_side.equals("BUY")) {
+			addOrder(placed_order, sell_orders, buy_orders);
+		} else {
+			addOrder(placed_order, buy_orders, sell_orders);
+		}
+	}
+
+	void fillPartialOrders(Order orderToBeFilled, int orderCount) {
+		if (filled_orders.containsKey(orderToBeFilled.order_id)) {
+			filled_orders.get(orderToBeFilled.order_id).order_trade_count = filled_orders
+					.get(orderToBeFilled.order_id).order_trade_count + orderCount;
+		} else {
+			try {
+				Order partialPlacedOrder = (Order) orderToBeFilled.clone();
+				partialPlacedOrder.order_trade_count = orderCount;
+				filled_orders.put(orderToBeFilled.order_id, partialPlacedOrder);
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	void completeOrderFromQueue(Order currentOrderFromQueue, int currentOrderFromQueueCount) {
+		if (filled_orders.containsKey(currentOrderFromQueue.order_id)) {
+			filled_orders.get(currentOrderFromQueue.order_id).order_trade_count = filled_orders
+					.get(currentOrderFromQueue.order_id).order_trade_count + currentOrderFromQueueCount;
+		} else {
+			filled_orders.put(currentOrderFromQueue.order_id, currentOrderFromQueue);
+		}
+	}
+
+	int executeOrder(Order placed_order, int placedOrderTradeCount, Queue ordersQueue, Order currentOrderFromQueue,
+			int currentOrderFromQueueCount) {
+
+		if (currentOrderFromQueueCount <= placedOrderTradeCount) {
+			completeOrderFromQueue(currentOrderFromQueue, currentOrderFromQueueCount);
+			ordersQueue.poll();
+			fillPartialOrders(placed_order, currentOrderFromQueueCount);
+			placedOrderTradeCount = placedOrderTradeCount - currentOrderFromQueueCount;
+		} else {
+			int currentFilledSellOrder = currentOrderFromQueueCount - placedOrderTradeCount;
+			currentOrderFromQueue.order_trade_count = currentFilledSellOrder;
+			try {
+				Order partialPlacedOrder = (Order) currentOrderFromQueue.clone();
+				partialPlacedOrder.order_trade_count = placedOrderTradeCount;
+				completeOrderFromQueue(partialPlacedOrder, placedOrderTradeCount);
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			fillPartialOrders(placed_order, placedOrderTradeCount);
+			placedOrderTradeCount = 0;
+		}
+		return placedOrderTradeCount;
+	}
+
 	/**
 	 * function addOrder
 	 * 
@@ -95,194 +153,40 @@ public class OrderBook {
 	 * @param placed_order
 	 *            - Order object based on user request
 	 */
-	void addOrder(Order placed_order) {
+	void addOrder(Order placed_order, Queue<Order> ordersQueue, Queue<Order> addPartialOrders) {
 
 		int placedOrderTradeCount = placed_order.order_trade_count;
 
-		if (placed_order.order_side.equals("BUY")) {
-
-			while (sell_orders.size() > 0 && placedOrderTradeCount != 0) {
-
-				Order currentSellOrder = sell_orders.peek();
-				int currentSellOrderCount = currentSellOrder.order_trade_count;
-
-				// check - buying price >= selling price
-				if (placed_order.order_price >= currentSellOrder.order_price) {
-
-					// check - available selling trade count <= buying trade
-					// count
-					if (currentSellOrderCount <= placedOrderTradeCount) {
-
-						if (filled_orders.containsKey(currentSellOrder.order_id)) {
-							filled_orders.get(currentSellOrder.order_id).order_trade_count = filled_orders
-									.get(currentSellOrder.order_id).order_trade_count + currentSellOrderCount;
-						} else {
-							filled_orders.put(currentSellOrder.order_id, currentSellOrder);
-						}
-
-						sell_orders.poll();
-
-						if (filled_orders.containsKey(placed_order.order_id)) {
-							filled_orders.get(placed_order.order_id).order_trade_count = filled_orders
-									.get(placed_order.order_id).order_trade_count + currentSellOrderCount;
-						} else {
-							try {
-								Order partialPlacedOrder = (Order) placed_order.clone();
-								partialPlacedOrder.order_trade_count = currentSellOrderCount;
-								filled_orders.put(placed_order.order_id, partialPlacedOrder);
-
-							} catch (CloneNotSupportedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						placedOrderTradeCount = placedOrderTradeCount - currentSellOrderCount;
-
-					} else {
-
-						int currentFilledSellOrder = currentSellOrderCount - placedOrderTradeCount;
-						currentSellOrder.order_trade_count = currentFilledSellOrder;
-
-						try {
-							Order partialPlacedOrder = (Order) currentSellOrder.clone();
-							partialPlacedOrder.order_trade_count = placedOrderTradeCount;
-
-							if (filled_orders.containsKey(partialPlacedOrder.order_id)) {
-								filled_orders.get(partialPlacedOrder.order_id).order_trade_count = filled_orders
-										.get(partialPlacedOrder.order_id).order_trade_count + placedOrderTradeCount;
-							} else {
-
-								filled_orders.put(partialPlacedOrder.order_id, partialPlacedOrder);
-							}
-
-						} catch (CloneNotSupportedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-						if (filled_orders.containsKey(placed_order.order_id)) {
-							filled_orders.get(placed_order.order_id).order_trade_count = filled_orders
-									.get(placed_order.order_id).order_trade_count + placedOrderTradeCount;
-						} else {
-							try {
-								Order partialPlacedOrder = (Order) placed_order.clone();
-								partialPlacedOrder.order_trade_count = placedOrderTradeCount;
-								filled_orders.put(placed_order.order_id, partialPlacedOrder);
-							} catch (CloneNotSupportedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-
-						placedOrderTradeCount = 0;
-					}
+		while (!ordersQueue.isEmpty() && placedOrderTradeCount != 0) {
+			Order currentOrderFromQueue = ordersQueue.peek();
+			int currentOrderFromQueueCount = currentOrderFromQueue.order_trade_count;
+			if (placed_order.order_side.equals("BUY")) {
+				if (placed_order.order_price >= currentOrderFromQueue.order_price) {
+					placedOrderTradeCount = executeOrder(placed_order, placedOrderTradeCount, ordersQueue,
+							currentOrderFromQueue, currentOrderFromQueueCount);
 				} else {
 					break;
 				}
-
-			}
-
-			if (placedOrderTradeCount > 0) {
-				try {
-					Order partialRemainingOrder = (Order) placed_order.clone();
-					partialRemainingOrder.order_trade_count = placedOrderTradeCount;
-					buy_orders.add(partialRemainingOrder);
-
-				} catch (CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		} else {
-
-			while (!buy_orders.isEmpty() && placedOrderTradeCount != 0) {
-
-				Order currentBuyOrder = buy_orders.peek();
-
-				int currentBuyOrderCount = currentBuyOrder.getOrderTradeCount();
-
-				if (placed_order.order_price <= currentBuyOrder.order_price) {
-
-					if (currentBuyOrderCount <= placedOrderTradeCount) {
-
-						if (filled_orders.containsKey(currentBuyOrder.order_id)) {
-							filled_orders.get(currentBuyOrder.order_id).order_trade_count = filled_orders
-									.get(currentBuyOrder.order_id).order_trade_count + currentBuyOrderCount;
-						} else {
-							filled_orders.put(currentBuyOrder.order_id, currentBuyOrder);
-						}
-
-						buy_orders.poll();
-
-						if (filled_orders.containsKey(placed_order.order_id)) {
-							filled_orders.get(placed_order.order_id).order_trade_count = filled_orders
-									.get(placed_order.order_id).order_trade_count + currentBuyOrderCount;
-						} else {
-							try {
-								Order partialPlacedOrder = (Order) placed_order.clone();
-								partialPlacedOrder.order_trade_count = currentBuyOrderCount;
-								filled_orders.put(placed_order.order_id, partialPlacedOrder);
-
-							} catch (CloneNotSupportedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						placedOrderTradeCount = placedOrderTradeCount - currentBuyOrderCount;
-
-					} else {
-						int currentFilledBuyOrder = currentBuyOrderCount - placedOrderTradeCount;
-
-						currentBuyOrder.order_trade_count = currentBuyOrder.order_trade_count - placedOrderTradeCount;
-
-						if (filled_orders.containsKey(currentBuyOrder.order_id)) {
-							filled_orders.get(currentBuyOrder.order_id).order_trade_count = filled_orders
-									.get(currentBuyOrder.order_id).order_trade_count + placedOrderTradeCount;
-						} else {
-							try {
-								Order partialPlacedOrder = (Order) currentBuyOrder.clone();
-								partialPlacedOrder.order_trade_count = placedOrderTradeCount;
-								filled_orders.put(currentBuyOrder.order_id, partialPlacedOrder);
-							} catch (CloneNotSupportedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-
-						if (filled_orders.containsKey(placed_order.order_id)) {
-							filled_orders.get(placed_order.order_id).order_trade_count = filled_orders
-									.get(placed_order.order_id).order_trade_count + placedOrderTradeCount;
-						} else {
-							try {
-								Order partialPlacedOrder = (Order) placed_order.clone();
-								partialPlacedOrder.order_trade_count = placedOrderTradeCount;
-								filled_orders.put(placed_order.order_id, partialPlacedOrder);
-							} catch (CloneNotSupportedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						placedOrderTradeCount = 0;
-					}
+			} else {
+				if (placed_order.order_price <= currentOrderFromQueue.order_price) {
+					placedOrderTradeCount = executeOrder(placed_order, placedOrderTradeCount, ordersQueue,
+							currentOrderFromQueue, currentOrderFromQueueCount);
 				} else {
 					break;
 				}
 			}
-
-			if (placedOrderTradeCount > 0) {
-				try {
-					Order partialRemainingOrder = (Order) placed_order.clone();
-					partialRemainingOrder.order_trade_count = placedOrderTradeCount;
-					sell_orders.add(partialRemainingOrder);
-
-				} catch (CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
 		}
 
+		if (placedOrderTradeCount > 0) {
+			try {
+				Order partialRemainingOrder = (Order) placed_order.clone();
+				partialRemainingOrder.order_trade_count = placedOrderTradeCount;
+				addPartialOrders.add(partialRemainingOrder);
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
+	
 }

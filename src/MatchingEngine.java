@@ -61,14 +61,14 @@ public class MatchingEngine {
 			while ((currentRow = buffer.readLine()) != null) {
 				String[] rowElements = currentRow.split(",");
 
-				if (!orderBooks.containsKey(rowElements[1])) {
-					orderBooks.put(rowElements[1], new OrderBook(rowElements[1]));
+				if (!orderBooks.containsKey(rowElements[2])) {
+					orderBooks.put(rowElements[2], new OrderBook(rowElements[2]));
 				}
 
-				cursorOrderBook = orderBooks.get(rowElements[1]);
+				cursorOrderBook = orderBooks.get(rowElements[2]);
 
-				cursorOrderBook.addOrderHelper(new Order((Date) format.parse(rowElements[0]), rowElements[1],
-						Double.parseDouble(rowElements[2]), rowElements[3], Integer.parseInt(rowElements[4])));
+				cursorOrderBook.addOrderHelper(new Order(Integer.parseInt(rowElements[0]), (Date) format.parse(rowElements[1]), rowElements[2],
+						Double.parseDouble(rowElements[3]), rowElements[4], Integer.parseInt(rowElements[5])));
 			}
 			buffer.close();
 		} catch (FileNotFoundException e) {

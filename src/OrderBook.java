@@ -34,11 +34,15 @@ public class OrderBook {
 	// lookup
 	Map<Integer, Order> filled_orders;
 
+	Map<Integer, Order> orderMap;
+
 	// constructor
 	OrderBook(String order_instrument) {
 		this.order_instrument = order_instrument;
 
 		filled_orders = new HashMap<Integer, Order>();
+
+		orderMap = new HashMap<Integer, Order>();
 
 		// customized priority queue for buy orders
 		buy_orders = new PriorityQueue<Order>(new Comparator<Order>() {
@@ -83,11 +87,28 @@ public class OrderBook {
 		});
 	}
 
+	void removeExistingOrder(int order_id) {
+		if (orderMap.containsKey(order_id)) {
+			if (orderMap.get(order_id).order_side.equals("BUY")) {
+				buy_orders.remove(orderMap.get(order_id));
+			} else {
+				sell_orders.remove(orderMap.get(order_id));
+			}
+			orderMap.remove(order_id);
+		}
+	}
+
 	void addOrderHelper(Order placed_order) {
-		if (placed_order.order_side.equals("BUY")) {
-			addOrder(placed_order, sell_orders, buy_orders);
-		} else {
-			addOrder(placed_order, buy_orders, sell_orders);
+		removeExistingOrder(placed_order.order_id);
+
+		if (!filled_orders.containsKey(placed_order.order_id)) {
+			if (placed_order.order_side.equals("BUY")) {
+				addOrder(placed_order, sell_orders, buy_orders);
+				orderMap.put(placed_order.order_id, placed_order);
+			} else if (placed_order.order_side.equals("SELL")) {
+				addOrder(placed_order, buy_orders, sell_orders);
+				orderMap.put(placed_order.order_id, placed_order);
+			}
 		}
 	}
 
@@ -189,5 +210,5 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 }

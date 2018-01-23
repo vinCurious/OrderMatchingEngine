@@ -16,22 +16,20 @@ import java.util.Date;
  */
 public class Order implements OrderInterface, Cloneable {
 
-	static int orderCounter = 0;
-	int order_id = 0;
+	int order_id;
 	Date order_time;
 	String order_instrument;
 	double order_price;
 	String order_side;
 	int order_trade_count;
 
-	Order(Date order_time, String order_instrument, double order_price, String order_side, int order_trade_count) {
-		this.order_id = orderCounter;
+	Order(int order_id, Date order_time, String order_instrument, double order_price, String order_side, int order_trade_count) {
+		this.order_id = order_id;
 		this.order_time = order_time;
 		this.order_instrument = order_instrument;
 		this.order_price = order_price;
 		this.order_side = order_side;
 		this.order_trade_count = order_trade_count;
-		this.orderCounter = this.orderCounter + 1;
 	}
 
 	public Object clone() throws CloneNotSupportedException {
